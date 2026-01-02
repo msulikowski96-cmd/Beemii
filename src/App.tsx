@@ -52,6 +52,7 @@ const App = () => {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [history, setHistory] = useState<SavedResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('health_history');
@@ -64,17 +65,25 @@ const App = () => {
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
+    setError(null);
     try {
+      console.log('Sending data to /api/analyze:', { ...data, bmi, bmr, tdee });
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, bmi, bmr, tdee }),
       });
+      
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Błąd serwera');
+      }
+      
       const result = await response.json();
       setAiAnalysis(result.analysis);
     } catch (err) {
-      console.error('AI Analysis failed', err);
-      setAiAnalysis("Wystąpił błąd podczas analizy AI. Upewnij się, że serwer działa.");
+      console.error('AI Analysis failed:', err);
+      setError("Wystąpił błąd podczas analizy AI. Upewnij się, że serwer działa poprawnie.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -124,7 +133,6 @@ const App = () => {
       </header>
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Parametry Wejściowe */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
             <Calculator className="text-blue-600" size={20} /> Wprowadź Dane
@@ -213,8 +221,13 @@ const App = () => {
           </div>
         </section>
 
-        {/* Wyniki Kalkulatora */}
         <div className="lg:col-span-2 space-y-8">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3">
+              <span className="font-medium">!</span> {error}
+            </div>
+          )}
+
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
@@ -234,8 +247,7 @@ const App = () => {
             </div>
           </section>
 
-          {/* AI Insights */}
-          <section className={`bg-white rounded-2xl shadow-sm border-2 border-blue-100 overflow-hidden transition-all duration-500 ${aiAnalysis ? 'opacity-100 translate-y-0' : 'opacity-50'}`}>
+          <section className={`bg-white rounded-2xl shadow-sm border-2 border-blue-100 overflow-hidden transition-all duration-500 ${aiAnalysis ? 'opacity-100 translate-y-0' : 'opacity-70'}`}>
             <div className="bg-blue-600 p-4 text-white flex items-center justify-between">
               <h2 className="font-semibold flex items-center gap-2">
                 <Brain size={20} /> Rekomendacje MetabolicAI
@@ -245,7 +257,14 @@ const App = () => {
             <div className="p-6">
               {!aiAnalysis ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-400 italic">Kliknij "Analizuj AI", aby otrzymać spersonalizowane wskazówki</p>
+                  {isAnalyzing ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <p className="text-blue-600 font-medium">Sztuczna inteligencja analizuje Twoje dane...</p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 italic">Kliknij "Analizuj AI", aby otrzymać spersonalizowane wskazówki</p>
+                  )}
                 </div>
               ) : (
                 <div className="prose prose-blue max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
@@ -255,7 +274,6 @@ const App = () => {
             </div>
           </section>
 
-          {/* Historia i Wykresy */}
           {history.length > 0 && (
             <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-8">
