@@ -14,4 +14,7 @@ export default defineConfig({
     port: 5000,
     allowedHosts: true,
   },
+  css: {
+    postcss: './postcss.config.js',
+  }
 });
