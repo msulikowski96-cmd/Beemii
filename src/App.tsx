@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Calculator, History, Brain, TrendingUp, User, ArrowRight, Save, Trash2 } from 'lucide-react';
+import { 
+  Activity, 
+  Calculator, 
+  Brain, 
+  TrendingUp, 
+  Save, 
+  Trash2, 
+  ChevronRight, 
+  Dumbbell, 
+  Apple, 
+  Zap,
+  Info,
+  Calendar,
+  User as UserIcon,
+  ArrowRight
+} from 'lucide-react';
 import { calculateBMI, calculateBMR, calculateTDEE, getBMICategory } from './utils/calculators';
 import { Line } from 'react-chartjs-2';
 import {
@@ -11,6 +26,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler
 } from 'chart.js';
 
 ChartJS.register(
@@ -20,7 +36,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 interface HealthData {
@@ -53,6 +70,7 @@ const App = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [history, setHistory] = useState<SavedResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'calc' | 'history'>('calc');
 
   useEffect(() => {
     const saved = localStorage.getItem('health_history');
@@ -67,7 +85,6 @@ const App = () => {
     setIsAnalyzing(true);
     setError(null);
     try {
-      console.log('Sending data to /api/analyze:', { ...data, bmi, bmr, tdee });
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 
@@ -79,15 +96,19 @@ const App = () => {
       
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        console.error('Non-JSON response received:', await response.text());
-        throw new Error('Serwer zwrócił nieprawidłowy format danych (HTML zamiast JSON).');
+        throw new Error('Błąd formatu danych serwera.');
       }
       
       const result = await response.json();
       setAiAnalysis(result.analysis);
+      
+      // Scroll to recommendations
+      setTimeout(() => {
+        document.getElementById('recommendations')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } catch (err) {
       console.error('AI Analysis failed:', err);
-      setError("Wystąpił błąd podczas analizy AI. Upewnij się, że serwer działa poprawnie.");
+      setError("Wystąpił błąd podczas analizy AI. Spróbuj ponownie za chwilę.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -96,7 +117,7 @@ const App = () => {
   const saveResult = () => {
     const newResult: SavedResult = {
       id: Date.now().toString(),
-      date: new Date().toLocaleDateString(),
+      date: new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' }),
       bmi,
       bmr,
       tdee,
@@ -108,201 +129,376 @@ const App = () => {
   };
 
   const clearHistory = () => {
-    setHistory([]);
-    localStorage.removeItem('health_history');
+    if(window.confirm('Czy na pewno chcesz wyczyścić historię?')) {
+      setHistory([]);
+      localStorage.removeItem('health_history');
+    }
   };
 
   const chartData = {
     labels: history.map(h => h.date),
     datasets: [
       {
-        label: 'Twoje BMI',
+        fill: true,
+        label: 'BMI',
         data: history.map(h => h.bmi),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.5)',
-        tension: 0.3,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#3b82f6',
       },
     ],
   };
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1f2937',
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: { size: 14 },
+        bodyFont: { size: 14 }
+      }
+    },
+    scales: {
+      y: { 
+        grid: { display: false },
+        ticks: { font: { size: 12 } }
+      },
+      x: { 
+        grid: { display: false },
+        ticks: { font: { size: 12 } }
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 md:p-8 font-sans">
-      <header className="max-w-6xl mx-auto mb-10 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-lg text-white">
-            <Activity size={28} />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans pb-20 md:pb-8">
+      {/* Premium Glass Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+              <Activity size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-slate-800">Metabolic<span className="text-blue-600">AI</span></span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">MetabolicAI</h1>
+          <div className="hidden md:flex items-center gap-6">
+            <button onClick={() => setActiveTab('calc')} className={`text-sm font-medium ${activeTab === 'calc' ? 'text-blue-600' : 'text-slate-500'}`}>Kalkulator</button>
+            <button onClick={() => setActiveTab('history')} className={`text-sm font-medium ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-500'}`}>Historia</button>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Calculator className="text-blue-600" size={20} /> Wprowadź Dane
-          </h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Płeć</label>
-              <div className="flex gap-2">
-                {['male', 'female'].map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setData({ ...data, gender: g as any })}
-                    className={`flex-1 py-2 rounded-lg border text-sm transition-all ${
-                      data.gender === g ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'
-                    }`}
-                  >
-                    {g === 'male' ? 'Mężczyzna' : 'Kobieta'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Waga (kg)</label>
-                <input
-                  type="number"
-                  value={data.weight}
-                  onChange={(e) => setData({ ...data, weight: Number(e.target.value) })}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Wzrost (cm)</label>
-                <input
-                  type="number"
-                  value={data.height}
-                  onChange={(e) => setData({ ...data, height: Number(e.target.value) })}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Wiek</label>
-                <input
-                  type="number"
-                  value={data.age}
-                  onChange={(e) => setData({ ...data, age: Number(e.target.value) })}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Aktywność</label>
-                <select
-                  value={data.activity}
-                  onChange={(e) => setData({ ...data, activity: Number(e.target.value) })}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                >
-                  <option value={1.2}>Brak (Siedzący)</option>
-                  <option value={1.375}>Niska (1-2 razy)</option>
-                  <option value={1.55}>Średnia (3-5 razy)</option>
-                  <option value={1.725}>Wysoka (codziennie)</option>
-                  <option value={1.9}>Bardzo wysoka</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
-            >
-              <Brain size={20} /> {isAnalyzing ? 'Analizowanie...' : 'Analizuj AI'}
-            </button>
-            <button
-              onClick={saveResult}
-              className="w-full mt-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2 rounded-xl flex items-center justify-center gap-2 transition-all border border-gray-200"
-            >
-              <Save size={18} /> Zapisz Wynik
-            </button>
-          </div>
-        </section>
-
-        <div className="lg:col-span-2 space-y-8">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3">
-              <span className="font-medium">!</span> {error}
-            </div>
-          )}
-
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-              <p className="text-sm font-medium text-gray-500 mb-1">Twoje BMI</p>
-              <h3 className="text-3xl font-bold text-blue-600">{bmi}</h3>
-              <p className="text-xs font-semibold mt-2 text-blue-500 uppercase tracking-wider">{getBMICategory(bmi)}</p>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <p className="text-sm font-medium text-gray-500 mb-1">BMR (Metabolizm)</p>
-              <h3 className="text-3xl font-bold text-gray-800">{bmr} <span className="text-sm font-normal text-gray-400">kcal</span></h3>
-              <p className="text-xs mt-2 text-gray-400">Energia spoczynkowa</p>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 bg-gradient-to-br from-white to-blue-50/30">
-              <p className="text-sm font-medium text-gray-500 mb-1">TDEE (Dzienne)</p>
-              <h3 className="text-3xl font-bold text-gray-800">{tdee} <span className="text-sm font-normal text-gray-400">kcal</span></h3>
-              <p className="text-xs mt-2 text-gray-400">Energia całkowita</p>
-            </div>
-          </section>
-
-          <section className={`bg-white rounded-2xl shadow-sm border-2 border-blue-100 overflow-hidden transition-all duration-500 ${aiAnalysis ? 'opacity-100 translate-y-0' : 'opacity-70'}`}>
-            <div className="bg-blue-600 p-4 text-white flex items-center justify-between">
-              <h2 className="font-semibold flex items-center gap-2">
-                <Brain size={20} /> Rekomendacje MetabolicAI
-              </h2>
-              {aiAnalysis && <div className="text-xs bg-white/20 px-2 py-1 rounded">Model: AI</div>}
-            </div>
-            <div className="p-6">
-              {!aiAnalysis ? (
-                <div className="text-center py-8">
-                  {isAnalyzing ? (
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <p className="text-blue-600 font-medium">Sztuczna inteligencja analizuje Twoje dane...</p>
-                    </div>
-                  ) : (
-                    <p className="text-gray-400 italic">Kliknij "Analizuj AI", aby otrzymać spersonalizowane wskazówki</p>
-                  )}
+      <main className="max-w-5xl mx-auto px-4 py-6 md:py-10">
+        {activeTab === 'calc' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+            {/* Input Sidebar */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-2 mb-6">
+                  <UserIcon size={18} className="text-blue-600" />
+                  <h2 className="font-bold text-slate-800 uppercase tracking-wider text-xs">Twoje Dane</h2>
                 </div>
-              ) : (
-                <div className="prose prose-blue max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
-                  {aiAnalysis}
+
+                <div className="space-y-5">
+                  <div className="p-1 bg-slate-100 rounded-2xl flex">
+                    {['male', 'female'].map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setData({ ...data, gender: g as any })}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                          data.gender === g ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        {g === 'male' ? 'Mężczyzna' : 'Kobieta'}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">Waga (kg)</label>
+                      <input
+                        type="number"
+                        value={data.weight}
+                        onChange={(e) => setData({ ...data, weight: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border-none rounded-2xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">Wzrost (cm)</label>
+                      <input
+                        type="number"
+                        value={data.height}
+                        onChange={(e) => setData({ ...data, height: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border-none rounded-2xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">Wiek</label>
+                      <input
+                        type="number"
+                        value={data.age}
+                        onChange={(e) => setData({ ...data, age: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border-none rounded-2xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">Aktywność</label>
+                      <select
+                        value={data.activity}
+                        onChange={(e) => setData({ ...data, activity: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border-none rounded-2xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none"
+                      >
+                        <option value={1.2}>Brak</option>
+                        <option value={1.375}>Niska</option>
+                        <option value={1.55}>Średnia</option>
+                        <option value={1.725}>Wysoka</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 space-y-3">
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={isAnalyzing}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                    >
+                      {isAnalyzing ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Analizuję...
+                        </div>
+                      ) : (
+                        <>
+                          <Brain size={20} /> Analizuj AI
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={saveResult}
+                      className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm"
+                    >
+                      <Save size={16} /> Zapisz wynik
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="lg:col-span-8 space-y-6">
+              {error && (
+                <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl flex items-center gap-3 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                  <div className="w-6 h-6 bg-rose-100 rounded-full flex items-center justify-center">!</div>
+                  {error}
                 </div>
               )}
-            </div>
-          </section>
 
-          {history.length > 0 && (
-            <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <TrendingUp className="text-blue-600" size={20} /> Historia Postępów
-                </h2>
-                <button onClick={clearHistory} className="text-xs text-red-500 hover:underline flex items-center gap-1">
-                  <Trash2 size={12} /> Wyczyść
+              {/* Metric Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
+                  <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-50 rounded-full transition-transform group-hover:scale-125 duration-500"></div>
+                  <div className="relative">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">BMI</p>
+                    <h3 className="text-4xl font-black text-slate-800">{bmi}</h3>
+                    <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">
+                      {getBMICategory(bmi)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Metabolizm (BMR)</p>
+                  <div className="flex items-baseline gap-1">
+                    <h3 className="text-3xl font-black text-slate-800">{bmr}</h3>
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-wider">kcal</span>
+                  </div>
+                  <p className="text-[10px] mt-2 text-slate-400 font-medium">Zapotrzebowanie podstawowe</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm bg-gradient-to-br from-white to-blue-50/20">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Energia (TDEE)</p>
+                  <div className="flex items-baseline gap-1">
+                    <h3 className="text-3xl font-black text-blue-600">{tdee}</h3>
+                    <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">kcal</span>
+                  </div>
+                  <p className="text-[10px] mt-2 text-slate-400 font-medium">Całkowite dzienne spalanie</p>
+                </div>
+              </div>
+
+              {/* Recommendations Section */}
+              <div id="recommendations" className={`transition-all duration-700 ${aiAnalysis ? 'opacity-100' : 'opacity-80'}`}>
+                <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden ring-4 ring-blue-50">
+                  <div className="bg-slate-900 p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white rotate-3">
+                        <Brain size={20} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white leading-tight">Analiza AI</h2>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Spersonalizowany plan</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-8">
+                    {!aiAnalysis && !isAnalyzing ? (
+                      <div className="text-center py-12 space-y-4">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                          <Zap size={32} />
+                        </div>
+                        <div className="max-w-xs mx-auto">
+                          <h3 className="font-bold text-slate-800">Gotowy na analizę?</h3>
+                          <p className="text-sm text-slate-500 mt-1">Kliknij przycisk po lewej, aby otrzymać wskazówki od AI.</p>
+                        </div>
+                      </div>
+                    ) : isAnalyzing ? (
+                        <div className="py-20 flex flex-col items-center justify-center gap-6">
+                            <div className="relative">
+                                <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Zap size={20} className="text-blue-600 animate-pulse" />
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <h3 className="font-bold text-slate-800 text-lg">Przetwarzanie danych</h3>
+                                <p className="text-sm text-slate-400 animate-pulse">Sztuczna inteligencja przygotowuje Twój plan...</p>
+                            </div>
+                        </div>
+                    ) : (
+                      <div className="animate-in fade-in zoom-in-95 duration-500">
+                        <div className="prose prose-slate prose-sm max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">
+                          {aiAnalysis}
+                        </div>
+                        
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-8">
+                            <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl">
+                                <Apple className="text-blue-600" size={18} />
+                                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Dieta</span>
+                            </div>
+                            <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl">
+                                <Dumbbell className="text-blue-600" size={18} />
+                                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Trening</span>
+                            </div>
+                            <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl">
+                                <Zap className="text-blue-600" size={18} />
+                                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Energia</span>
+                            </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* History View */
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">Twoja Historia</h2>
+                <p className="text-slate-500 text-sm">Monitoruj zmiany składu ciała w czasie</p>
+              </div>
+              <button 
+                onClick={clearHistory}
+                className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 transition-colors"
+                title="Wyczyść historię"
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
+
+            {history.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8">
+                {/* Chart Card */}
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm h-[400px]">
+                  <div className="flex items-center gap-2 mb-8">
+                    <TrendingUp size={18} className="text-blue-600" />
+                    <h3 className="font-bold text-slate-800 text-xs uppercase tracking-widest">Wykres BMI</h3>
+                  </div>
+                  <div className="h-[280px]">
+                    <Line data={chartData} options={chartOptions} />
+                  </div>
+                </div>
+
+                {/* History Table/List */}
+                <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+                   <div className="overflow-x-auto">
+                     <table className="w-full text-left">
+                       <thead className="bg-slate-50 border-b border-slate-100">
+                         <tr>
+                           <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Waga</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">BMI</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">TDEE</th>
+                         </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-50">
+                         {history.slice().reverse().map((h) => (
+                           <tr key={h.id} className="hover:bg-slate-50/50 transition-colors">
+                             <td className="px-6 py-4 font-bold text-slate-800 text-sm">{h.date}</td>
+                             <td className="px-6 py-4 font-bold text-slate-600 text-sm">{h.weight} kg</td>
+                             <td className="px-6 py-4">
+                               <span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-black text-xs">{h.bmi}</span>
+                             </td>
+                             <td className="px-6 py-4 font-bold text-slate-600 text-sm">{h.tdee} kcal</td>
+                           </tr>
+                         ))}
+                       </tbody>
+                     </table>
+                   </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white p-16 rounded-[32px] border border-slate-100 text-center space-y-4 shadow-sm">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                  <Calendar size={32} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800">Brak zapisanych wyników</h3>
+                  <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Wróć do kalkulatora i kliknij "Zapisz wynik", aby zacząć budować swoją historię.</p>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('calc')}
+                  className="inline-flex items-center gap-2 text-blue-600 font-bold text-sm hover:gap-3 transition-all"
+                >
+                  Przejdź do kalkulatora <ArrowRight size={16} />
                 </button>
               </div>
-              <div className="h-64">
-                <Line 
-                  data={chartData} 
-                  options={{ 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: false } }
-                  }} 
-                />
-              </div>
-            </section>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-slate-200 md:hidden pb-safe">
+        <div className="flex items-center h-16">
+          <button 
+            onClick={() => setActiveTab('calc')}
+            className={`flex-1 flex flex-col items-center gap-1 ${activeTab === 'calc' ? 'text-blue-600' : 'text-slate-400'}`}
+          >
+            <Calculator size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Kalkulator</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-400'}`}
+          >
+            <History size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Historia</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };
