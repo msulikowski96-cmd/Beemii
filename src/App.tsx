@@ -252,7 +252,7 @@ const App = () => {
               <h2 className="font-semibold flex items-center gap-2">
                 <Brain size={20} /> Rekomendacje MetabolicAI
               </h2>
-              {aiAnalysis && <div className="text-xs bg-white/20 px-2 py-1 rounded">Model: GPT-4o</div>}
+              {aiAnalysis && <div className="text-xs bg-white/20 px-2 py-1 rounded">Model: GPT-5</div>}
             </div>
             <div className="p-6">
               {!aiAnalysis ? (
