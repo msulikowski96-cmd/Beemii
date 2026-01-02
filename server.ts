@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Reverting to Replit AI Integration
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
@@ -41,7 +40,7 @@ app.post('/api/analyze', async (req, res) => {
     Odpowiedz w języku polskim, używając profesjonalnego, ale przystępnego tonu.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Switching to a faster, more widely available model
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -53,14 +52,15 @@ app.post('/api/analyze', async (req, res) => {
 });
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  });
-}
+const publicPath = path.join(__dirname, 'dist');
+app.use(express.static(publicPath));
 
-const PORT = 5001;
+app.get('*', (req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+// Port 5000 is the main entry point
+const PORT = 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Backend server strictly listening on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

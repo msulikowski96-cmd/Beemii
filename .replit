@@ -13,7 +13,7 @@ expertMode = true
 integrations = ["javascript_openai_ai_integrations:2.0.0"]
 
 [workflows]
-runButton = "Main App"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -28,21 +28,17 @@ args = "Main App"
 name = "Main App"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run start"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run server"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 5000
 
 [[ports]]
 localPort = 5002
