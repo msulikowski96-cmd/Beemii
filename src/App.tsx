@@ -6,7 +6,6 @@ import {
   TrendingUp, 
   Save, 
   Trash2, 
-  ChevronRight, 
   Dumbbell, 
   Apple, 
   Zap,
@@ -77,7 +76,13 @@ const App = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem('health_history');
-    if (saved) setHistory(JSON.parse(saved));
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse history', e);
+      }
+    }
   }, []);
 
   const bmi = calculateBMI(data.weight, data.height);
@@ -182,7 +187,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-slate-900 font-sans pb-20 md:pb-8 selection:bg-indigo-100">
-      {/* Dynamic Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-40">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-200 rounded-full blur-[120px]"></div>
         <div className="absolute top-[20%] -right-[10%] w-[35%] h-[35%] bg-blue-100 rounded-full blur-[100px]"></div>
@@ -216,7 +220,6 @@ const App = () => {
       <main className="max-w-5xl mx-auto px-4 py-8 relative">
         {activeTab === 'calc' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Input Sidebar */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-white/80 backdrop-blur-md p-7 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-white/80">
                 <div className="flex items-center gap-3 mb-8">
@@ -323,7 +326,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Main Results Content Area */}
             <div className="lg:col-span-8 space-y-8">
               {error && (
                 <div className="bg-rose-50 border border-rose-100 text-rose-600 p-5 rounded-3xl flex items-center gap-4 text-sm font-bold shadow-lg shadow-rose-100 animate-in fade-in slide-in-from-top-4">
@@ -332,7 +334,6 @@ const App = () => {
                 </div>
               )}
 
-              {/* High-Impact Metric Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="group bg-white p-8 rounded-[2.5rem] border border-white shadow-xl shadow-slate-200/50 transition-all hover:-translate-y-1 relative overflow-hidden">
                   <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
@@ -378,7 +379,6 @@ const App = () => {
                 </div>
               </div>
 
-              {/* AI Analysis Section */}
               <div id="recommendations" className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-[3rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
                 <div className="relative bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white">
@@ -534,7 +534,6 @@ const App = () => {
         )}
       </main>
 
-      {/* Futuristic Bottom Navigation */}
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl w-[calc(100%-2rem)] max-w-sm md:hidden p-2">
         <div className="flex items-center">
           <button 
