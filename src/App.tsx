@@ -13,7 +13,8 @@ import {
   Info,
   Calendar,
   User as UserIcon,
-  ArrowRight
+  ArrowRight,
+  History as HistoryIcon
 } from 'lucide-react';
 import { calculateBMI, calculateBMR, calculateTDEE, getBMICategory } from './utils/calculators';
 import { Line } from 'react-chartjs-2';
@@ -102,7 +103,6 @@ const App = () => {
       const result = await response.json();
       setAiAnalysis(result.analysis);
       
-      // Scroll to recommendations
       setTimeout(() => {
         document.getElementById('recommendations')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -178,7 +178,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans pb-20 md:pb-8">
-      {/* Premium Glass Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -197,7 +196,6 @@ const App = () => {
       <main className="max-w-5xl mx-auto px-4 py-6 md:py-10">
         {activeTab === 'calc' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-            {/* Input Sidebar */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <div className="flex items-center gap-2 mb-6">
@@ -294,7 +292,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Main Content Area */}
             <div className="lg:col-span-8 space-y-6">
               {error && (
                 <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl flex items-center gap-3 text-sm font-medium animate-in fade-in slide-in-from-top-2">
@@ -303,7 +300,6 @@ const App = () => {
                 </div>
               )}
 
-              {/* Metric Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-50 rounded-full transition-transform group-hover:scale-125 duration-500"></div>
@@ -335,7 +331,6 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Recommendations Section */}
               <div id="recommendations" className={`transition-all duration-700 ${aiAnalysis ? 'opacity-100' : 'opacity-80'}`}>
                 <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden ring-4 ring-blue-50">
                   <div className="bg-slate-900 p-6 flex items-center justify-between">
@@ -402,7 +397,6 @@ const App = () => {
             </div>
           </div>
         ) : (
-          /* History View */
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between">
               <div>
@@ -420,7 +414,6 @@ const App = () => {
 
             {history.length > 0 ? (
               <div className="grid grid-cols-1 gap-8">
-                {/* Chart Card */}
                 <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm h-[400px]">
                   <div className="flex items-center gap-2 mb-8">
                     <TrendingUp size={18} className="text-blue-600" />
@@ -431,7 +424,6 @@ const App = () => {
                   </div>
                 </div>
 
-                {/* History Table/List */}
                 <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
                    <div className="overflow-x-auto">
                      <table className="w-full text-left">
@@ -480,7 +472,6 @@ const App = () => {
         )}
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-slate-200 md:hidden pb-safe">
         <div className="flex items-center h-16">
           <button 
@@ -494,7 +485,7 @@ const App = () => {
             onClick={() => setActiveTab('history')}
             className={`flex-1 flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-400'}`}
           >
-            <History size={20} />
+            <HistoryIcon size={20} />
             <span className="text-[10px] font-bold uppercase tracking-widest">Historia</span>
           </button>
         </div>
