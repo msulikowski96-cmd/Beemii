@@ -13,7 +13,7 @@ expertMode = true
 integrations = ["javascript_openai_ai_integrations:2.0.0"]
 
 [workflows]
-runButton = "Project"
+runButton = "Main App"
 
 [[workflows.workflow]]
 name = "Project"
@@ -43,3 +43,7 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 5002
+externalPort = 3002
