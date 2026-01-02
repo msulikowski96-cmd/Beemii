@@ -4,28 +4,58 @@
 
 @layer base {
   body {
+    @apply antialiased;
     -webkit-tap-highlight-color: transparent;
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #e2e8f0;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #cbd5e1;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
 }
 
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Typography Overrides */
+.prose {
+  @apply text-slate-600;
+}
+
+.prose strong {
+  @apply text-indigo-900 font-black;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  @apply text-slate-900 font-black tracking-tight uppercase text-xs mb-4;
 }
