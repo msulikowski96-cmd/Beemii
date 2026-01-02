@@ -5,8 +5,8 @@ modules = ["dart-3.3", "nodejs-20"]
 channel="stable-24_05"
 
 [deployment]
-run = ["dart", "main.dart"]
-deploymentTarget = "cloudrun"
+run = ["npm", "run", "server"]
+deploymentTarget = "autoscale"
 
 [agent]
 expertMode = true
@@ -42,8 +42,8 @@ externalPort = 80
 
 [[ports]]
 localPort = 5001
-externalPort = 3000
+externalPort = 5000
 
 [[ports]]
 localPort = 5002
-externalPort = 3002
+externalPort = 5173
