@@ -10,8 +10,7 @@ const app = express();
 app.use(express.json());
 
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 app.post('/api/analyze', async (req, res) => {
@@ -40,9 +39,8 @@ app.post('/api/analyze', async (req, res) => {
     Odpowiedz w języku polskim, używając profesjonalnego, ale przystępnego tonu.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5.1",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      max_completion_tokens: 1500,
     });
 
     res.json({ analysis: response.choices[0].message.content });
