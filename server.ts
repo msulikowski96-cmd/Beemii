@@ -12,7 +12,7 @@ app.use(express.json());
 // Konfiguracja OpenRouter.ai
 const apiKey = process.env.OPENROUTER_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
 const baseURL = process.env.OPENROUTER_API_KEY ? "https://openrouter.ai/api/v1" : (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || undefined);
-const model = process.env.OPENROUTER_MODEL || "gpt-4o-mini";
+const model = process.env.OPENROUTER_MODEL || "qwen/qwen3-4b:free";
 
 if (!apiKey) {
   console.warn("Brak klucza API. Analiza AI nie będzie działać.");
@@ -53,7 +53,7 @@ app.post('/api/analyze', async (req, res) => {
     Odpowiedz w języku polskim, używając profesjonalnego, ale przystępnego tonu.`;
 
     const response = await openai.chat.completions.create({
-      model: model || "qwen/qwen-2-7b-instruct:free",
+      model: model || "qwen/qwen3-4b:free",
       messages: [{ role: "user", content: prompt }],
     });
 
