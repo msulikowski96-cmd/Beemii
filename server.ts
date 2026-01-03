@@ -12,7 +12,7 @@ app.use(express.json());
 // AI Configuration - OpenRouter.ai only
 const apiKey = process.env.OPENROUTER_API_KEY;
 const baseURL = "https://openrouter.ai/api/v1";
-const model = process.env.OPENROUTER_MODEL || "qwen/qwen3-4b:free";
+const model = "google/gemini-2.0-flash-exp:free";
 
 if (!apiKey) {
   console.warn("Brak klucza OPENROUTER_API_KEY. Analiza AI nie będzie działać.");
@@ -22,7 +22,7 @@ const openai = new OpenAI({
   apiKey: apiKey,
   baseURL: baseURL,
   defaultHeaders: {
-    "HTTP-Referer": "https://replit.com", // Wymagane przez OpenRouter
+    "HTTP-Referer": "https://replit.com",
     "X-Title": "MetabolicAI",
   }
 });
