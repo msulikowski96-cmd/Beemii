@@ -53,7 +53,7 @@ app.post('/api/analyze', async (req, res) => {
     Odpowiedz w języku polskim, używając profesjonalnego, ale przystępnego tonu.`;
 
     const response = await openai.chat.completions.create({
-      model: model,
+      model: model || "qwen/qwen-2-7b-instruct:free",
       messages: [{ role: "user", content: prompt }],
     });
 
