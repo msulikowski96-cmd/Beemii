@@ -12,7 +12,7 @@ app.use(express.json());
 // AI Configuration - OpenRouter.ai only
 const apiKey = process.env.OPENROUTER_API_KEY;
 const baseURL = "https://openrouter.ai/api/v1";
-const model = "google/gemini-2.0-flash-exp:free";
+const model = "deepseek/deepseek-r1-0528:free";
 
 if (!apiKey) {
   console.warn("Brak klucza OPENROUTER_API_KEY. Analiza AI nie będzie działać.");
