@@ -9,13 +9,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-const apiKey = process.env.OPENROUTER_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-const isOpenRouter = !!process.env.OPENROUTER_API_KEY;
-const baseURL = isOpenRouter ? "https://openrouter.ai/api/v1" : (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || undefined);
-const model = isOpenRouter ? (process.env.OPENROUTER_MODEL || "qwen/qwen3-4b:free") : "gpt-4o-mini";
+// AI Configuration - OpenRouter.ai only
+const apiKey = process.env.OPENROUTER_API_KEY;
+const baseURL = "https://openrouter.ai/api/v1";
+const model = process.env.OPENROUTER_MODEL || "qwen/qwen3-4b:free";
 
 if (!apiKey) {
-  console.warn("Brak klucza API. Analiza AI nie będzie działać.");
+  console.warn("Brak klucza OPENROUTER_API_KEY. Analiza AI nie będzie działać.");
 }
 
 const openai = new OpenAI({
