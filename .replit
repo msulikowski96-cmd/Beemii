@@ -44,3 +44,9 @@ externalPort = 80
 [[ports]]
 localPort = 5002
 externalPort = 5173
+
+[userenv]
+
+[userenv.shared]
+OPENROUTER_API_KEY = "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"
+OPENROUTER_MODEL = "qwen/qwen-2-7b-instruct:free"
