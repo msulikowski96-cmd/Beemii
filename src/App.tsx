@@ -170,7 +170,7 @@ const App = () => {
         backgroundColor: '#1e293b',
         padding: 12,
         cornerRadius: 12,
-        titleFont: { size: 14, weight: 'bold' },
+        titleFont: { size: 14, weight: 'bold' as const },
         bodyFont: { size: 14 }
       }
     },
