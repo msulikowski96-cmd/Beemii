@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { 
   Activity, 
   Calculator, 
@@ -428,7 +429,7 @@ const App = () => {
                     ) : (
                       <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                         <div className="prose prose-indigo prose-lg max-w-none text-slate-700 leading-relaxed font-medium bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100">
-                          {aiAnalysis}
+                          <ReactMarkdown>{aiAnalysis}</ReactMarkdown>
                         </div>
                         
                         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">

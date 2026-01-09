@@ -32,7 +32,15 @@ app.post('/api/analyze', async (req, res) => {
     const { weight, height, age, gender, activity, bmi, bmr, tdee } = req.body;
 
     const prompt = `Jesteś ekspertem ds. zdrowia metabolicznego i dietetyki. 
-    Przeanalizuj poniższe dane użytkownika i podaj:
+    Przeanalizuj poniższe dane użytkownika i przygotuj odpowiedź w formacie Markdown, aby była czytelna.
+    
+    Użyj:
+    - Nagłówków (###)
+    - List punktowanych
+    - Pogrubienia (bold) dla kluczowych wartości
+    - Tabeli, jeśli to możliwe (np. dla makroskładników)
+
+    Podaj:
     1. AI-Score (ocena zdrowia metabolicznego 1-100).
     2. Krótkie podsumowanie obecnego stanu.
     3. Konkretne, spersonalizowane rekomendacje dotyczące:
