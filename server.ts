@@ -19,7 +19,7 @@ if (!apiKey) {
 }
 
 const openai = new OpenAI({
-  apiKey: apiKey,
+  apiKey: apiKey || 'dummy-key-for-startup',
   baseURL: baseURL,
   defaultHeaders: {
     "HTTP-Referer": "https://replit.com",
@@ -28,6 +28,10 @@ const openai = new OpenAI({
 });
 
 app.post('/api/analyze', async (req, res) => {
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI analysis unavailable - OPENROUTER_API_KEY not configured' });
+  }
+  
   try {
     const { weight, height, age, gender, activity, bmi, bmr, tdee } = req.body;
 
